@@ -1,0 +1,12 @@
+# Virtual environment
+venv/
+__pycache__/
+*.pyc
+
+# Heavy data and cached tensors
+data/*.pt
+*.pt
+data/*.json
+
+# Figures
+*.png
