@@ -6,8 +6,8 @@
 [![Model](https://img.shields.io/badge/Backbone-Qwen2.5--0.5B--Instruct-purple.svg)](https://huggingface.co/Qwen/Qwen2.5-0.5B-Instruct)
 
 > **Course Project:** Foundation of Large Language Models (AI60213)  
-> **Instructor:** Prof. Plaban Kumar Bhowmick  
-> **Group Number:** Group [Insert Group Number]
+> **Instructor:** Prof. Plaban Kumar Bhowmick and Dr. Shreya Ghosh  
+> **Group Number:** Group 6
 
 ---
 
@@ -74,7 +74,7 @@ pip install torch transformers accelerate tqdm matplotlib numpy scikit-learn
 
 The cached hidden states exceed GitHub's 100 MB file limit (approximately 360 MB total). Download the `.pt` files from the team's shared Google Drive and place them in `data/`.
 
-**Google Drive download link:** [Insert your team's Drive link here]
+**Google Drive download link:** [https://drive.google.com/drive/folders/1pjWxnrtSfe1NMAjgwtM2z0wtdWsVpD-R?usp=sharing]
 
 Required files:
 
