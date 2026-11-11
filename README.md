@@ -20,7 +20,7 @@ In this project, we introduce **Step-INSPECTOR**, an empirical extension that in
 ## Core Contributions
 
 1. **Sub-solution granularity:** Extends the *Representation-as-a-Judge* paradigm from whole-response scoring to step-level error detection without generating critique text.
-2. **Causal supervision masking:** Implements a dynamic loss mask that supervises steps up to the first error index \(k^*\) and masks post-error steps, preventing corrupted deductive chains from injecting noise into the probe.
+2. **Causal supervision masking:** Implements a dynamic loss mask that supervises steps up to the first error index $k^*$ and masks post-error steps, preventing corrupted deductive chains from injecting noise into the probe.
 3. **Layer-depth geometry analysis:** Investigates the residual stream across all 24 layers of Qwen2.5-0.5B to identify the depth at which deductive fallacies become linearly separable.
 4. **Diagnostic and bias auditing:** Implements a Position-Only baseline and Length-Bias stress test to assess whether the probe learns semantic deductive validity rather than positional or verbosity shortcuts. The project distinguishes this task setting from self-verification search methods such as *ReProbe* (ACL 2026).
 
@@ -108,11 +108,11 @@ The evaluation follows the definitions in Assignment 3 and MR-GSM8K.
 - **Verdict Accuracy:** Accuracy in distinguishing correct from incorrect solutions.
 - **First-Error Accuracy:** Exact step-localization accuracy, evaluated only on ground-truth faulty reasoning chains:
 
-  \[
-  \mathrm{FirstErrorAccuracy} =
-  \frac{\sum_{i: k_i^*>0} \mathbf{1}[\hat{k}_i = k_i^*]}
-       {\sum_i \mathbf{1}[k_i^*>0]}.
-  \]
+$$
+\mathrm{FirstErrorAccuracy} =
+\frac{\sum_{i: k_i^* > 0} \mathbf{1}[\hat{k}_i = k_i^*]}
+     {\sum_i \mathbf{1}[k_i^* > 0]}.
+$$
 
 - **Joint Accuracy:** Percentage of instances for which both the verdict and the exact first-error step index are correct.
 
@@ -138,8 +138,8 @@ Implemented in `spatial_pooling.py`.
 
 | Operator | Formula |
 |---|---|
-| Mean pooling | \( h_m = \frac{1}{\vert s_m \vert} \sum_{t \in s_m} h_t \) |
-| Last-token pooling | \( h_m = h_{\text{end}(m)} \) |
+| Mean pooling | $h_m = \frac{1}{|s_m|} \sum_{t \in s_m} h_t$ |
+| Last-token pooling | $h_m = h_{\text{end}(m)}$ |
 | Global (baseline) | Whole-response mean pooling (base INSPECTOR baseline) |
 
 **Finding**
