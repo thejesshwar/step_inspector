@@ -196,7 +196,7 @@ Run the ablation scripts locally:
 ```bash
 python run_role3_depth.py
 python run_role3_masking_ablation.py
-
+```
 ### Member 4: Diagnostic Benchmarks & Meta-Evaluation
 
 *Pending — to be filled by Member 4 (Position-only baseline, Length-bias audit, Joint/First-Error metrics).*
