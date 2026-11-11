@@ -138,7 +138,7 @@ Implemented in `spatial_pooling.py`.
 
 | Operator | Formula |
 |---|---|
-| Mean pooling | \( h_m = \frac{1}{|s_m|} \sum_{t \in s_m} h_t \) |
+| Mean pooling | \( h_m = \frac{1}{\vert s_m \vert} \sum_{t \in s_m} h_t \) |
 | Last-token pooling | \( h_m = h_{\text{end}(m)} \) |
 | Global (baseline) | Whole-response mean pooling (base INSPECTOR baseline) |
 
