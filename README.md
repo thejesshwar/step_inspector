@@ -168,9 +168,34 @@ python spatial_pooling.py
 
 *Pending — to be filled by Member 2 (StepInspector module, probe capacity ablation: Linear vs. MLP).*
 
-### Member 3: Layer-Depth & Representation Dynamics
+### Member 3: Layer-Depth & Representation Dynamics (Causal Masking Track)
 
-*Pending — to be filled by Member 3 (multi-layer residual extraction, layer-depth progression curve, Cross-Layer Attention probe).*
+Implemented in `run_role3_depth.py`, `custom_loss.py`, and `run_role3_masking_ablation.py`.
+
+**Setup**
+- Probed all 24 Transformer layers of frozen `Qwen2.5-0.5B-Instruct` using a 2-layer MLP (`StepProbe`: Linear(896, 224) → LayerNorm → GELU → Linear(224, 1)).
+- Implemented and evaluated a parametric **Cross-Layer Attention Probe (CLAP)** utilizing layer positional embeddings and scaled dot-product attention across all 24 layers.
+- Formulated and ablated the **Causal Masked Step BCE Loss** ($\mathcal{L}_{\text{causal}}$) to isolate true deductive breakdown from post-error premise contamination.
+
+**1. Layer-Depth Dynamics Findings**
+- Evaluative error-detection features are virtually absent in shallow layers (Layers 1–2: 0.0% FE-Acc).
+- Signal emerges in mid-layers (Layer 15–16: ~24–26% FE-Acc) and peaks sharply at **Layer 22 (36.0% First-Error Accuracy, 73.0% Verdict Accuracy, 63.0% Joint Accuracy)**.
+- **Single-Layer vs. Cross-Layer Attention:** The single-layer probe at Layer 22 (36.0%) outperforms the Cross-Layer Attention Probe (22.0%). Due to limited training supervision (500 samples), CLAP's attention weights overfit and attend to uninformative shallow/mid-layer residual noise, whereas the Layer 22 residual stream already concentrates the linear separability of mathematical validity.
+
+**2. Causal Loss Masking Ablation (Layer 22)**
+
+| Supervision Masking Scheme | Verdict Acc (%) | First-Error Acc (%) | Joint Acc (%) |
+|---|---|---|---|
+| **Proposed Causal Masking** | **72.0** | **36.0** | **60.0** |
+| Naive Unmasked (Target = 0) | 62.0 | 18.0 | 54.0 |
+| Naive Unmasked (Target = 1) | 71.0 | 30.0 | 57.0 |
+
+*Takeaway:* Causal masking doubles First-Error Accuracy over Naive Unmasked Target=0 (36.0% vs. 18.0%). Downstream steps following an arithmetic failure operate on corrupted premises; unmasked training injects contradictory gradients (penalizing locally sound calculations or penalizing premise sensitivity), whereas causal truncation isolates the exact point of logical failure.
+
+Run the ablation scripts locally:
+```bash
+python run_role3_depth.py
+python run_role3_masking_ablation.py
 
 ### Member 4: Diagnostic Benchmarks & Meta-Evaluation
 
