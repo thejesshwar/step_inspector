@@ -20,7 +20,7 @@ In this project, we introduce **Step-INSPECTOR**, an empirical extension that in
 ## Core Contributions
 
 1. **Sub-solution granularity:** Extends the *Representation-as-a-Judge* paradigm from whole-response scoring to step-level error detection without generating critique text.
-2. **Causal supervision masking:** Implements a dynamic loss mask that supervises steps up to the first error index \(k^*\) and masks post-error steps, preventing corrupted deductive chains from injecting noise into the probe.
+2. **Causal supervision masking:** Implements a dynamic loss mask that supervises steps up to the first error index $k^*$ and masks post-error steps, preventing corrupted deductive chains from injecting noise into the probe.
 3. **Layer-depth geometry analysis:** Investigates the residual stream across all 24 layers of Qwen2.5-0.5B to identify the depth at which deductive fallacies become linearly separable.
 4. **Diagnostic and bias auditing:** Implements a Position-Only baseline and Length-Bias stress test to assess whether the probe learns semantic deductive validity rather than positional or verbosity shortcuts. The project distinguishes this task setting from self-verification search methods such as *ReProbe* (ACL 2026).
 
@@ -108,11 +108,11 @@ The evaluation follows the definitions in Assignment 3 and MR-GSM8K.
 - **Verdict Accuracy:** Accuracy in distinguishing correct from incorrect solutions.
 - **First-Error Accuracy:** Exact step-localization accuracy, evaluated only on ground-truth faulty reasoning chains:
 
-  \[
-  \mathrm{FirstErrorAccuracy} =
-  \frac{\sum_{i: k_i^*>0} \mathbf{1}[\hat{k}_i = k_i^*]}
-       {\sum_i \mathbf{1}[k_i^*>0]}.
-  \]
+$$
+\mathrm{FirstErrorAccuracy} =
+\frac{\sum_{i: k_i^* > 0} \mathbf{1}[\hat{k}_i = k_i^*]}
+     {\sum_i \mathbf{1}[k_i^* > 0]}.
+$$
 
 - **Joint Accuracy:** Percentage of instances for which both the verdict and the exact first-error step index are correct.
 
@@ -122,6 +122,45 @@ The evaluation follows the definitions in Assignment 3 and MR-GSM8K.
 - **ReProbe:** Ni et al. (ACL 2026). *ReProbe: Efficient Test-Time Scaling of Multi-Step Reasoning by Probing Internal States of Large Language Models.*
 - **MR-GSM8K:** Zeng et al. (2024). *MR-GSM8K: A Meta-Reasoning Benchmark for Large Language Model Evaluation.*
 - **Qwen2.5:** Yang et al. (2024). *Qwen2.5 Technical Report.*
+
+## Results & Findings
+
+### Member 1: Spatial & Pooling Dynamics
+
+Implemented in `spatial_pooling.py`.
+
+**Setup**
+- Step-span slicing via regex (verified 650/650 on MR-GSM8K)
+- Tokenizer offset mapping (`return_offsets_mapping=True`) → char spans → token indices
+- Cached multi-layer representations from frozen `Qwen2.5-0.5B-Instruct` (24 layers, 896-dim)
+
+**Pooling operators compared**
+
+| Operator | Formula |
+|---|---|
+| Mean pooling | $h_m = \frac{1}{|s_m|} \sum_{t \in s_m} h_t$ |
+| Last-token pooling | $h_m = h_{\text{end}(m)}$ |
+| Global (baseline) | Whole-response mean pooling (base INSPECTOR baseline) |
+
+**Finding**
+Mean pooling consistently outperforms last-token and global pooling across all 24 layers, peaking around layers 14–18 (test AUROC ≈ 0.83). This indicates that step-level error signals are **distributed across semantic tokens** rather than concentrated at step delimiters — supporting the hypothesis that sub-solution granularity improves error detectability over whole-response pooling.
+
+Run the ablation locally:
+```bash
+python spatial_pooling.py
+```
+
+### Member 2: Core Architecture & Probing
+
+*Pending — to be filled by Member 2 (StepInspector module, probe capacity ablation: Linear vs. MLP).*
+
+### Member 3: Layer-Depth & Representation Dynamics
+
+*Pending — to be filled by Member 3 (multi-layer residual extraction, layer-depth progression curve, Cross-Layer Attention probe).*
+
+### Member 4: Diagnostic Benchmarks & Meta-Evaluation
+
+*Pending — to be filled by Member 4 (Position-only baseline, Length-bias audit, Joint/First-Error metrics).*
 
 ## Academic Integrity and AI Declaration
 
