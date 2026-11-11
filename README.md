@@ -149,7 +149,15 @@ Implemented in `spatial_pooling.py`.
 | Global (baseline) | Whole-response mean pooling (base INSPECTOR baseline) |
 
 **Finding**
-Mean pooling consistently outperforms last-token and global pooling across all 24 layers, peaking around layers 14–18 (test AUROC ≈ 0.83). This indicates that step-level error signals are **distributed across semantic tokens** rather than concentrated at step delimiters — supporting the hypothesis that sub-solution granularity improves error detectability over whole-response pooling.
+Mean pooling consistently outperforms last-token and global pooling across all 24 layers, peaking at **Layer 18 (40.0% First-Error Accuracy)**. Last-token pooling peaks at Layer 7 (36.0%) and Global (whole-response) pooling peaks at Layer 12 (8.0%). This indicates that step-level error signals are **distributed across semantic tokens** rather than concentrated at step delimiters — supporting the hypothesis that sub-solution granularity improves error detectability over whole-response pooling.
+
+**Pooling Ablation Summary (Test Split, First-Error Accuracy):**
+
+| Strategy | Best Layer | Best FE-Acc (%) | Mean FE-Acc (%) |
+|---|---|---|---|
+| Mean Pooling | 18 | 40.0 | 22.8 |
+| Last-Token Pooling | 7 | 36.0 | 27.5 |
+| Global (Whole-Response) | 12 | 8.0 | 4.5 |
 
 Run the ablation locally:
 ```bash
