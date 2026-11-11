@@ -108,11 +108,19 @@ The evaluation follows the definitions in Assignment 3 and MR-GSM8K.
 - **Verdict Accuracy:** Accuracy in distinguishing correct from incorrect solutions.
 - **First-Error Accuracy:** Exact step-localization accuracy, evaluated only on ground-truth faulty reasoning chains:
 
-$$
-\mathrm{FirstErrorAccuracy} =
-\frac{\sum_{i: k_i^* > 0} \mathbf{1}[\hat{k}_i = k_i^*]}
-     {\sum_i \mathbf{1}[k_i^* > 0]}.
-$$
+
+```math
+\mathrm{FirstErrorAccuracy}
+=
+\frac{
+    \sum_{i: k_{i}^{*} > 0}
+    \mathbf{1}[\hat{k}_{i} = k_{i}^{*}]
+}{
+    \sum_{i}
+    \mathbf{1}[k_{i}^{*} > 0]
+}
+```
+
 
 - **Joint Accuracy:** Percentage of instances for which both the verdict and the exact first-error step index are correct.
 
@@ -138,7 +146,7 @@ Implemented in `spatial_pooling.py`.
 
 | Operator | Formula |
 |---|---|
-| Mean pooling | $h_m = \frac{1}{|s_m|} \sum_{t \in s_m} h_t$ |
+| Mean pooling | $h_m = \frac{1}{\lvert s_m \rvert} \sum_{t \in s_m} h_t$ |
 | Last-token pooling | $h_m = h_{\text{end}(m)}$ |
 | Global (baseline) | Whole-response mean pooling (base INSPECTOR baseline) |
 
