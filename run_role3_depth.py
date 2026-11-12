@@ -1,3 +1,8 @@
+"""
+run_role3_depth.py
+Member 3: Layer-Depth & Representation Dynamics Track
+"""
+
 import torch
 import torch.nn as nn
 import torch.optim as optim
@@ -7,10 +12,12 @@ import numpy as np
 import copy
 import math
 
+from custom_loss import MaskedStepBCELoss
+
 DEVICE = "cuda" if torch.cuda.is_available() else "cpu"
 
 class StepProbe(nn.Module):
-    def __init__(self, hidden_dim=896):
+    def __init__(self, hidden_dim=1024):
         super().__init__()
         self.head = nn.Sequential(
             nn.Linear(hidden_dim, hidden_dim // 4),
@@ -22,14 +29,11 @@ class StepProbe(nn.Module):
         return self.head(x).squeeze(-1)
 
 class CrossLayerAttentionProbe(nn.Module):
-    def __init__(self, num_layers=24, hidden_dim=896):
+    def __init__(self, num_layers=28, hidden_dim=1024):
         super().__init__()
-        # Layer Positional Encodings
         self.layer_pos_embed = nn.Embedding(num_layers, hidden_dim)
-        
         self.query = nn.Parameter(torch.randn(1, 1, hidden_dim) * (hidden_dim ** -0.5))
         
-        # Attention
         self.W_q = nn.Linear(hidden_dim, hidden_dim, bias=False)
         self.W_k = nn.Linear(hidden_dim, hidden_dim, bias=False)
         self.W_v = nn.Linear(hidden_dim, hidden_dim, bias=False)
@@ -38,20 +42,16 @@ class CrossLayerAttentionProbe(nn.Module):
 
     def forward(self, all_layers_x):
         B, L, M, D = all_layers_x.shape
-        
-        # Inject positional awareness across model depth
         positions = torch.arange(L, device=all_layers_x.device)
         pos_emb = self.layer_pos_embed(positions).view(1, L, 1, D)
         all_layers_x = all_layers_x + pos_emb
         
-        # Reshape for multi head attention math
         x_reshaped = all_layers_x.permute(0, 2, 1, 3).reshape(B * M, L, D) 
         
         Q = self.W_q(self.query.expand(B * M, -1, -1)) 
         K = self.W_k(x_reshaped)                       
         V = self.W_v(x_reshaped) 
         
-        # Scaled Dot Product Attention
         scores = torch.bmm(Q, K.transpose(1, 2)) / math.sqrt(D) 
         alpha = torch.softmax(scores, dim=-1)                  
         
@@ -62,8 +62,7 @@ class CrossLayerAttentionProbe(nn.Module):
         return logits, alpha.reshape(B, M, L).mean(dim=1)      
 
 def get_optimizer(model, lr=1e-3, weight_decay=1e-2):
-    """Prevents weight decay on LayerNorm and bias parameters."""
-    no_decay = ["bias", "LayerNorm.weight"]
+    no_decay = ["bias", "LayerNorm.weight", "head.1.weight"]
     optimizer_grouped_parameters = [
         {
             "params": [p for n, p in model.named_parameters() if not any(nd in n for nd in no_decay)],
@@ -77,7 +76,6 @@ def get_optimizer(model, lr=1e-3, weight_decay=1e-2):
     return optim.AdamW(optimizer_grouped_parameters, lr=lr)
 
 def evaluate_predictions(logits, gold_first_errors, step_token_lengths, threshold=0.5):
-    """Computes exact metrics without masking valid steps."""
     valid_step_mask = (step_token_lengths > 0)
     probs = torch.sigmoid(logits) * valid_step_mask.float()
     
@@ -102,8 +100,9 @@ def evaluate_predictions(logits, gold_first_errors, step_token_lengths, threshol
     joint_acc = (pred_first_errors == gold_first_errors).float().mean().item() * 100
     return verdict_acc, first_error_acc, joint_acc
 
-def train_and_evaluate(model, train_loader, val_data, test_data, epochs=20, lr=1e-3, is_cross_layer=False):
+def train_and_evaluate(model, train_loader, val_data, test_data, epochs=20, lr=1e-3, is_cross_layer=False, return_state=False):
     optimizer = get_optimizer(model, lr=lr)
+    loss_fn = MaskedStepBCELoss()
     
     X_val, y_val, mask_val, gold_val, lens_val = val_data
     X_test, y_test, mask_test, gold_test, lens_test = test_data
@@ -116,17 +115,15 @@ def train_and_evaluate(model, train_loader, val_data, test_data, epochs=20, lr=1
         for X_b, y_b, mask_b in train_loader:
             optimizer.zero_grad()
             logits = model(X_b)[0] if is_cross_layer else model(X_b)
-            
-            bce = nn.functional.binary_cross_entropy_with_logits(logits, y_b, reduction='none')
-            loss = (bce * mask_b).sum() / (mask_b.sum() + 1e-8)
+            loss = loss_fn(logits, y_b, mask_b)
             loss.backward()
+            torch.nn.utils.clip_grad_norm_(model.parameters(), 1.0)
             optimizer.step()
             
         model.eval()
         with torch.no_grad():
             val_logits = model(X_val)[0] if is_cross_layer else model(X_val)
-            val_bce = nn.functional.binary_cross_entropy_with_logits(val_logits, y_val, reduction='none')
-            val_loss = (val_bce * mask_val).sum() / (mask_val.sum() + 1e-8)
+            val_loss = loss_fn(val_logits, y_val, mask_val)
             
             if val_loss.item() < best_val_loss:
                 best_val_loss = val_loss.item()
@@ -136,7 +133,10 @@ def train_and_evaluate(model, train_loader, val_data, test_data, epochs=20, lr=1
     model.eval()
     with torch.no_grad():
         test_logits = model(X_test)[0] if is_cross_layer else model(X_test)
-        return evaluate_predictions(test_logits, gold_test, lens_test)
+        metrics = evaluate_predictions(test_logits, gold_test, lens_test)
+        if return_state:
+            return metrics, {k: v.cpu() for k, v in best_model_state.items()}
+        return metrics
 
 def prep_data(data_dict, device):
     return (
@@ -162,55 +162,79 @@ def main():
     test_tup = prep_data(test, DEVICE)
 
     num_layers = X_train.shape[1]
+    hidden_dim = X_train.shape[3]
+    model_label = "Qwen3-0.6B" if num_layers == 28 else "Qwen2.5-0.5B"
+    print(f"Detected {model_label} representations: {num_layers} layers, {hidden_dim} hidden dim")
     print(f"{'Layer Depth':<14} | {'Verdict Acc (%)':<16} | {'First-Error Acc (%)':<20} | {'Joint Acc (%)':<14}")
 
+    layer_v_accs = []
     layer_fe_accs = []
+    layer_j_accs = []
+    layer_states = []
 
     for layer in range(num_layers):
+        g = torch.Generator(device="cpu").manual_seed(42)
         dataset = TensorDataset(X_train[:, layer, :, :], y_train, mask_train)
-        loader = DataLoader(dataset, batch_size=32, shuffle=True)
+        loader = DataLoader(dataset, batch_size=32, shuffle=True, generator=g)
 
         val_layer_tup = (val_tup[0][:, layer, :, :], val_tup[1], val_tup[2], val_tup[3], val_tup[4])
         test_layer_tup = (test_tup[0][:, layer, :, :], test_tup[1], test_tup[2], test_tup[3], test_tup[4])
 
         torch.manual_seed(42)
-        probe = StepProbe().to(DEVICE)
+        probe = StepProbe(hidden_dim=hidden_dim).to(DEVICE)
         
-        v_acc, fe_acc, j_acc = train_and_evaluate(
-            probe, loader, val_layer_tup, test_layer_tup, epochs=20, lr=1e-3
+        (v_acc, fe_acc, j_acc), state = train_and_evaluate(
+            probe, loader, val_layer_tup, test_layer_tup, epochs=20, lr=1e-3, return_state=True
         )
 
+        layer_v_accs.append(v_acc)
         layer_fe_accs.append(fe_acc)
-        print(f"Layer {layer+1:02d}/24     | {v_acc:<16.2f} | {fe_acc:<20.2f} | {j_acc:<14.2f}")
+        layer_j_accs.append(j_acc)
+        layer_states.append(state)
+        print(f"Layer {layer+1:02d}/{num_layers:02d}   | {v_acc:<16.2f} | {fe_acc:<20.2f} | {j_acc:<14.2f}")
 
-    best_layer = np.argmax(layer_fe_accs) + 1
-    best_fe = np.max(layer_fe_accs)
-    print("="*70)
-    print(f"Peak First Error Accuracy: Layer {best_layer} ({best_fe:.2f}%)")
+    # Break ties on FE Acc using Joint Acc and then Verdict Acc
+    best_idx = int(max(range(num_layers), key=lambda i: (layer_fe_accs[i], layer_j_accs[i], layer_v_accs[i])))
+    best_layer = best_idx + 1
+    best_fe = float(layer_fe_accs[best_idx])
+    best_v = float(layer_v_accs[best_idx])
+    best_j = float(layer_j_accs[best_idx])
+    print(f"Optimal Layer: Layer {best_layer} (V-Acc: {best_v:.1f}% | FE-Acc: {best_fe:.1f}% | J-Acc: {best_j:.1f}%)")
+
+    torch.save({
+        "state_dict": layer_states[best_idx],
+        "best_layer_idx": best_idx,
+        "best_layer_num": best_layer,
+        "hidden_dim": hidden_dim,
+        "num_layers": num_layers,
+        "model_label": model_label
+    }, "data/best_step_probe.pt")
+    print(f"Saved optimal probe checkpoint (Layer {best_layer}) to 'data/best_step_probe.pt'")
 
     print("\nTraining Cross Layer Attention Probe")
+    g_multi = torch.Generator(device="cpu").manual_seed(42)
     dataset_multi = TensorDataset(X_train, y_train, mask_train)
-    loader_multi = DataLoader(dataset_multi, batch_size=32, shuffle=True)
+    loader_multi = DataLoader(dataset_multi, batch_size=32, shuffle=True, generator=g_multi)
     
     torch.manual_seed(42)
-    clap = CrossLayerAttentionProbe(num_layers=num_layers).to(DEVICE)
+    clap = CrossLayerAttentionProbe(num_layers=num_layers, hidden_dim=hidden_dim).to(DEVICE)
     c_vacc, c_feacc, c_jacc = train_and_evaluate(
         clap, loader_multi, val_tup, test_tup, epochs=30, lr=5e-4, is_cross_layer=True
     )
         
-    print(f"Cross-Layer Attn | {c_vacc:<16.2f} | {c_feacc:<20.2f} | {c_jacc:<14.2f}")
+    print(f"Cross Layer Attn | {c_vacc:<16.2f} | {c_feacc:<20.2f} | {c_jacc:<14.2f}")
 
-    # Plotting
     plt.figure(figsize=(9, 4.5))
     layers = list(range(1, num_layers + 1))
     plt.plot(layers, layer_fe_accs, marker='o', color='#1f77b4', lw=2.2, label='Single Layer Probes')
     plt.axhline(y=c_feacc, color='#2ca02c', linestyle='--', lw=2, label=f'Cross-Layer Probe ({c_feacc:.1f}%)')
     plt.axvline(x=best_layer, color='crimson', linestyle=':', lw=1.8, label=f'Optimal Depth (L{best_layer})')
     
-    plt.title("Reasoning Error Localization Across Qwen2.5-0.5B Depth", fontsize=12, pad=10)
+    plt.title(f"Reasoning Error Localization Across {model_label} Depth", fontsize=12, pad=10)
     plt.xlabel("Transformer Layer Index", fontsize=11)
     plt.ylabel("First-Error Accuracy (%)", fontsize=11)
     plt.xticks(range(1, num_layers + 1, 2))
+    plt.ylim(0, max(50, int(best_fe) + 10))
     plt.grid(True, linestyle='--', alpha=0.5)
     plt.legend(frameon=True, loc='best')
     plt.tight_layout()
