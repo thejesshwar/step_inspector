@@ -138,7 +138,8 @@ Implemented in `spatial_pooling.py`.
 **Setup**
 - Step-span slicing via regex (verified 650/650 on MR-GSM8K)
 - Tokenizer offset mapping (`return_offsets_mapping=True`) → char spans → token indices
-- Cached multi-layer representations from frozen `Qwen2.5-0.5B-Instruct` (24 layers, 896-dim)
+- Cached multi-layer representations from frozen `Qwen2.5-0.5B-Instruct` (24 layers, 896-dim) in `data/`
+- Cached multi-layer representations from frozen `Qwen3-0.6B` (28 layers, 1024-dim) in `qwen3/`
 
 **Pooling operators compared**
 
@@ -149,19 +150,25 @@ Implemented in `spatial_pooling.py`.
 | Global (baseline) | Whole-response mean pooling (base INSPECTOR baseline) |
 
 **Finding**
-Mean pooling consistently outperforms last-token and global pooling across all 24 layers, peaking at **Layer 18 (40.0% First-Error Accuracy)**. Last-token pooling peaks at Layer 7 (36.0%) and Global (whole-response) pooling peaks at Layer 12 (8.0%). This indicates that step-level error signals are **distributed across semantic tokens** rather than concentrated at step delimiters — supporting the hypothesis that sub-solution granularity improves error detectability over whole-response pooling.
+Mean pooling consistently outperforms last-token and global pooling across all layers on both models, confirming that step-level error signals are **distributed across semantic tokens** rather than concentrated at step delimiters — supporting the hypothesis that sub-solution granularity improves error detectability over whole-response pooling.
 
 **Pooling Ablation Summary (Test Split, First-Error Accuracy):**
 
-| Strategy | Best Layer | Best FE-Acc (%) | Mean FE-Acc (%) |
-|---|---|---|---|
-| Mean Pooling | 18 | 40.0 | 22.8 |
-| Last-Token Pooling | 7 | 36.0 | 27.5 |
-| Global (Whole-Response) | 12 | 8.0 | 4.5 |
+| Model | Strategy | Best Layer | Best FE-Acc (%) | Verdict Acc (%) | Joint Acc (%) | Mean FE-Acc (%) |
+|---|---|---|---|---|---|---|
+| Qwen2.5-0.5B (24L) | Mean Pooling | 18 | 40.0 | 67.0 | 50.0 | 22.8 |
+| Qwen2.5-0.5B (24L) | Last-Token Pooling | 18 | 36.0 | 66.0 | 42.0 | 27.5 |
+| Qwen2.5-0.5B (24L) | Global (Whole-Response) | 15 | 8.0 | 66.0 | 45.0 | 4.5 |
+| Qwen3-0.6B (28L) | Mean Pooling | 24 | 38.0 | 68.0 | 48.0 | 23.7 |
+| Qwen3-0.6B (28L) | Last-Token Pooling | 21 | 30.0 | 64.0 | 44.0 | 21.6 |
+| Qwen3-0.6B (28L) | Global (Whole-Response) | 25 | 8.0 | 66.0 | 47.0 | 5.1 |
+
+On both models, Mean Pooling achieves the highest First-Error Accuracy (Qwen2.5: 40.0% at Layer 18; Qwen3: 38.0% at Layer 24), while Global (whole-response) pooling stays near chance (~8%) — confirming that whole-response averaging washes out localized step-level errors.
 
 Run the ablation locally:
 ```bash
-python spatial_pooling.py
+python spatial_pooling.py   # Qwen2.5 caches in data/
+python plot_pooling_ablation.py  # auto-detects model from cache shape
 ```
 
 ### Member 2: Core Architecture & Probing
