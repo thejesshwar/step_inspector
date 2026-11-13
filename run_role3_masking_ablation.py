@@ -77,19 +77,19 @@ def train_ablation(X_train, y_train, mask_train, lens_train, val_tup, test_tup, 
 def main():
     print(f"Loading cached tensors on {DEVICE}")
     try:
-        train = torch.load("backup_qwen25/train_cached.pt", map_location=DEVICE, weights_only=True)
-        val = torch.load("backup_qwen25/val_cached.pt", map_location=DEVICE, weights_only=True)
-        test = torch.load("backup_qwen25/test_cached.pt", map_location=DEVICE, weights_only=True)
+        train = torch.load("data/train_cached.pt", map_location=DEVICE, weights_only=True)
+        val = torch.load("data/val_cached.pt", map_location=DEVICE, weights_only=True)
+        test = torch.load("data/test_cached.pt", map_location=DEVICE, weights_only=True)
     except FileNotFoundError:
-        print("Error: Cached data files not found in 'backup_qwen25/'. Please ensure the files exist.")
+        print("Error: Cached data files not found in 'data/'. Please ensure the files exist.")
         return
 
     X_train, y_train, mask_train, gold_train, lens_train = prep_data(train, DEVICE)
     val_tup = prep_data(val, DEVICE)
     test_tup = prep_data(test, DEVICE)
 
-    if os.path.exists("backup_qwen25/best_step_probe.pt"):
-        ckpt = torch.load("backup_qwen25/best_step_probe.pt", map_location="cpu", weights_only=True)
+    if os.path.exists("data/best_step_probe.pt"):
+        ckpt = torch.load("data/best_step_probe.pt", map_location="cpu", weights_only=True)
         best_layer_idx = int(ckpt["best_layer_idx"])
         model_label = ckpt["model_label"]
     else:

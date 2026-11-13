@@ -191,8 +191,8 @@ def run_pooling_ablation(train_cache: dict, test_cache: dict, strategies: tuple 
 
 if __name__ == "__main__":
     try:
-        train_c = torch.load("data/train_cached.pt", map_location="cpu", weights_only=True)
-        test_c = torch.load("data/test_cached.pt", map_location="cpu", weights_only=True)
+        train_c = torch.load("backup_qwen25/train_cached.pt", map_location="cpu", weights_only=True)
+        test_c = torch.load("backup_qwen25/test_cached.pt", map_location="cpu", weights_only=True)
         print(f"\nExecuting Spatial Pooling Ablation (Train -> Test)")
         run_pooling_ablation(train_c, test_c)
     except FileNotFoundError:
