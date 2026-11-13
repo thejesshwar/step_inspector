@@ -158,11 +158,11 @@ def prep_data(data_dict, device):
 def main():
     print(f"Loading cached tensors on {DEVICE}")
     try:
-        train = torch.load("data/train_cached.pt", map_location=DEVICE, weights_only=True)
-        val = torch.load("data/val_cached.pt", map_location=DEVICE, weights_only=True)
-        test = torch.load("data/test_cached.pt", map_location=DEVICE, weights_only=True)
+        train = torch.load("backup_qwen25/train_cached.pt", map_location=DEVICE, weights_only=True)
+        val = torch.load("backup_qwen25/val_cached.pt", map_location=DEVICE, weights_only=True)
+        test = torch.load("backup_qwen25/test_cached.pt", map_location=DEVICE, weights_only=True)
     except FileNotFoundError:
-        print("Error: Cached tensors not found. Ensure 'train_cached.pt' is in 'data/'.")
+        print("Error: Cached tensors not found. Ensure 'train_cached.pt' is in 'backup_qwen25/'")
         return
 
     X_train, y_train, mask_train, gold_train, lens_train = prep_data(train, DEVICE)
@@ -230,8 +230,8 @@ def main():
         "hidden_dim": hidden_dim,
         "num_layers": num_layers,
         "model_label": model_label
-    }, "data/best_step_probe.pt")
-    print(f"Saved optimal probe checkpoint (Layer {best_layer}) to 'data/best_step_probe.pt'")
+    }, "backup_qwen25/best_step_probe.pt")
+    print(f"Saved optimal probe checkpoint (Layer {best_layer}) to 'backup_qwen25/best_step_probe.pt'")
 
     print("\nTraining Cross Layer Attention Probe")
     g_multi = torch.Generator(device="cpu").manual_seed(42)
@@ -253,8 +253,7 @@ def main():
     plt.plot(layers, layer_test_fe_accs, marker='o', color='#1f77b4', lw=2.2, label='Single Layer Probes (Test Data)')
     plt.axhline(y=c_t_feacc, color='#2ca02c', linestyle='--', lw=2, label=f'Cross-Layer Probe ({c_t_feacc:.1f}%)')
     
-    plt.axvline(x=best_layer, color='crimson', linestyle=':', lw=2, 
-                label=f'Val-Selected Optimal Depth (L{best_layer})')
+    plt.axvline(x=best_layer, color='crimson', linestyle=':', lw=2, label=f'OOF-Selected Optimal Depth (L{best_layer})')
     
     plt.title(f"Reasoning Error Localization Across {model_label} Depth", fontsize=12, pad=10)
     plt.xlabel("Transformer Layer Index", fontsize=11)
@@ -264,7 +263,7 @@ def main():
     plt.grid(True, linestyle='--', alpha=0.5)
     plt.legend(frameon=True, loc='best')
     plt.tight_layout()
-    plt.savefig("layer_depth_progression.png", dpi=300)
+    plt.savefig("backup_qwen25/layer_depth_progression.png", dpi=300)
     print("\nSaved plot as 'layer_depth_progression.png'")
 
 if __name__ == "__main__":

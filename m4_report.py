@@ -259,7 +259,7 @@ def fig_length(runs, path):
     ax.set_ylim(0.4, 1.1)
     ax.set_yticks([0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1.0])
     ax.set_ylabel("Step AUROC inside length tertile (test)")
-    ax.set_title("Is the signal just step length? AUROC within matched-length thirds", loc="left", fontsize=10.5, color=INK, pad=8)
+    ax.set_title("Is the signal just step length? AUROC within length tertiles", loc="left", fontsize=10.5, color=INK, pad=8)
     ax.grid(axis="x", visible=False)
     ax.legend(frameon=False, loc="upper center", bbox_to_anchor=(0.5, -0.1), ncol=max(1, len(names)))
     fig.tight_layout()
