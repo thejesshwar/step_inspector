@@ -1,0 +1,153 @@
+{
+  "tag": "qwen3",
+  "model_id": "Qwen/Qwen3-0.6B",
+  "layer": 16,
+  "device": "cpu",
+  "seed": 42,
+  "thresholds_from_oof": {
+    "joint": 0.85,
+    "balanced": 0.22499999999999998
+  },
+  "cached_baseline_test": {
+    "joint": {
+      "verdict": 0.68,
+      "first_error": 0.14,
+      "joint": 0.53
+    },
+    "balanced": {
+      "verdict": 0.71,
+      "first_error": 0.34,
+      "joint": 0.52
+    }
+  },
+  "max_abs_probe_probability_difference_fresh_vs_cache": 0.004795,
+  "n_target_steps": 40,
+  "paddings": {
+    "filler": " For clarity, this step uses the same quantities and calculation already written above; it introduces no additional operation.",
+    "plain": " This explanation is written in plain language to make the step easier to read.",
+    "repeat": "<step text repeated>"
+  },
+  "results": {
+    "filler": {
+      "correct": {
+        "n": 20,
+        "mean_added_tokens": 21.0,
+        "mean_original_probability": 0.1547,
+        "mean_padded_probability": 0.2459,
+        "mean_delta": 0.0912,
+        "mean_delta_ci95": [
+          0.0354,
+          0.1593
+        ],
+        "median_delta": 0.0276,
+        "fraction_delta_negative": 0.1,
+        "joint_flag_on_to_off": 0,
+        "joint_flag_off_to_on": 0,
+        "joint_whole_response_prediction_changed": 0,
+        "balanced_flag_on_to_off": 0,
+        "balanced_flag_off_to_on": 3,
+        "balanced_whole_response_prediction_changed": 3
+      },
+      "first_error": {
+        "n": 20,
+        "mean_added_tokens": 21.0,
+        "mean_original_probability": 0.2832,
+        "mean_padded_probability": 0.471,
+        "mean_delta": 0.1879,
+        "mean_delta_ci95": [
+          0.1196,
+          0.2549
+        ],
+        "median_delta": 0.155,
+        "fraction_delta_negative": 0.1,
+        "joint_flag_on_to_off": 0,
+        "joint_flag_off_to_on": 1,
+        "joint_whole_response_prediction_changed": 2,
+        "balanced_flag_on_to_off": 0,
+        "balanced_flag_off_to_on": 8,
+        "balanced_whole_response_prediction_changed": 8
+      }
+    },
+    "plain": {
+      "correct": {
+        "n": 20,
+        "mean_added_tokens": 15.0,
+        "mean_original_probability": 0.1547,
+        "mean_padded_probability": 0.2373,
+        "mean_delta": 0.0827,
+        "mean_delta_ci95": [
+          0.0347,
+          0.1419
+        ],
+        "median_delta": 0.0141,
+        "fraction_delta_negative": 0.05,
+        "joint_flag_on_to_off": 0,
+        "joint_flag_off_to_on": 1,
+        "joint_whole_response_prediction_changed": 2,
+        "balanced_flag_on_to_off": 0,
+        "balanced_flag_off_to_on": 3,
+        "balanced_whole_response_prediction_changed": 3
+      },
+      "first_error": {
+        "n": 20,
+        "mean_added_tokens": 15.0,
+        "mean_original_probability": 0.2832,
+        "mean_padded_probability": 0.4481,
+        "mean_delta": 0.1649,
+        "mean_delta_ci95": [
+          0.1056,
+          0.2288
+        ],
+        "median_delta": 0.1186,
+        "fraction_delta_negative": 0.0,
+        "joint_flag_on_to_off": 0,
+        "joint_flag_off_to_on": 1,
+        "joint_whole_response_prediction_changed": 2,
+        "balanced_flag_on_to_off": 0,
+        "balanced_flag_off_to_on": 4,
+        "balanced_whole_response_prediction_changed": 6
+      }
+    },
+    "repeat": {
+      "correct": {
+        "n": 20,
+        "mean_added_tokens": 31.9,
+        "mean_original_probability": 0.1547,
+        "mean_padded_probability": 0.1575,
+        "mean_delta": 0.0028,
+        "mean_delta_ci95": [
+          -0.0284,
+          0.0339
+        ],
+        "median_delta": 0.0015,
+        "fraction_delta_negative": 0.3,
+        "joint_flag_on_to_off": 0,
+        "joint_flag_off_to_on": 0,
+        "joint_whole_response_prediction_changed": 0,
+        "balanced_flag_on_to_off": 0,
+        "balanced_flag_off_to_on": 1,
+        "balanced_whole_response_prediction_changed": 1
+      },
+      "first_error": {
+        "n": 20,
+        "mean_added_tokens": 30.9,
+        "mean_original_probability": 0.2832,
+        "mean_padded_probability": 0.2838,
+        "mean_delta": 0.0006,
+        "mean_delta_ci95": [
+          -0.0759,
+          0.0734
+        ],
+        "median_delta": 0.002,
+        "fraction_delta_negative": 0.45,
+        "joint_flag_on_to_off": 0,
+        "joint_flag_off_to_on": 0,
+        "joint_whole_response_prediction_changed": 1,
+        "balanced_flag_on_to_off": 1,
+        "balanced_flag_off_to_on": 2,
+        "balanced_whole_response_prediction_changed": 6
+      }
+    }
+  },
+  "interpretation": "Paired score change after adding text to one arithmetic step. Added text also changes semantics, so this shows sensitivity to this intervention, not proof of length-bias causality."
+}
