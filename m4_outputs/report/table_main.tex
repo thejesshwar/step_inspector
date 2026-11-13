@@ -1,0 +1,21 @@
+\begin{table}[t]
+\centering
+\small
+\begin{tabular}{llccccc}
+\toprule
+Model & Method & AUROC & Top-step (\%) & Verdict (\%) & First-error (\%) & Joint (\%) \\
+\midrule
+Qwen2.5-0.5B & Step probe & 0.880 & 38.0 & 73.0 & 34.0 & 55.0 \\
+ & Position only & 0.506 & 14.0 & 50.0 & 10.0 & 5.0 \\
+ & Length only & 0.708 & 24.0 & 55.0 & 16.0 & 28.0 \\
+ & Position + length & 0.716 & 22.0 & 51.0 & 18.0 & 14.0 \\
+\midrule
+Qwen3-0.6B & Step probe & 0.857 & 36.0 & 71.0 & 34.0 & 52.0 \\
+ & Position only & 0.506 & 14.0 & 50.0 & 10.0 & 5.0 \\
+ & Length only & 0.708 & 24.0 & 55.0 & 16.0 & 28.0 \\
+ & Position + length & 0.716 & 22.0 & 51.0 & 18.0 & 14.0 \\
+\bottomrule
+\end{tabular}
+\caption{Test-set results (100 solutions, 50 faulty). Layer chosen by out-of-fold AUROC on train+val; thresholds chosen out-of-fold (balanced operating point). Top-step: highest-scoring step equals the gold first-error step given a faulty solution.}
+\label{tab:member4_main}
+\end{table}

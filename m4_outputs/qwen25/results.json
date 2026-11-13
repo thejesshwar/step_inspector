@@ -1,0 +1,426 @@
+{
+  "meta": {
+    "tag": "qwen25",
+    "model_id": "Qwen/Qwen2.5-0.5B-Instruct",
+    "num_layers": 24,
+    "hidden_dim": 896,
+    "layer": 19,
+    "layer_selected_by": "max out-of-fold step AUROC on train+val",
+    "n_train": 500,
+    "n_val": 50,
+    "n_test": 100,
+    "n_test_faulty": 50,
+    "folds": 5,
+    "seeds": 3,
+    "epochs": 20,
+    "bootstrap_resamples": 2000,
+    "torch": "2.14.0+cpu"
+  },
+  "reference": {
+    "modal_first_error_step_from_train_val": 1,
+    "modal_step_top_step_acc_test": 0.1,
+    "random_step_expected_top_step_acc_test": 0.1346,
+    "always_correct_joint_acc_test": 0.5
+  },
+  "methods": {
+    "probe": {
+      "operating_points": {
+        "joint": {
+          "threshold": 0.44999999999999996,
+          "test": {
+            "verdict": 0.74,
+            "first_error": 0.38,
+            "joint": 0.61
+          },
+          "oof": {
+            "verdict": 0.6945,
+            "first_error": 0.3309,
+            "joint": 0.5527
+          }
+        },
+        "balanced": {
+          "threshold": 0.3,
+          "test": {
+            "verdict": 0.73,
+            "first_error": 0.34,
+            "joint": 0.55
+          },
+          "oof": {
+            "verdict": 0.7055,
+            "first_error": 0.3345,
+            "joint": 0.5309
+          }
+        }
+      },
+      "step_auroc": 0.8798,
+      "step_auroc_no_answer_lines": 0.849,
+      "top_step_acc": 0.38
+    },
+    "position_only": {
+      "operating_points": {
+        "joint": {
+          "threshold": 0.49999999999999994,
+          "test": {
+            "verdict": 0.5,
+            "first_error": 0.0,
+            "joint": 0.5
+          },
+          "oof": {
+            "verdict": 0.5,
+            "first_error": 0.0,
+            "joint": 0.5
+          }
+        },
+        "balanced": {
+          "threshold": 0.075,
+          "test": {
+            "verdict": 0.5,
+            "first_error": 0.1,
+            "joint": 0.05
+          },
+          "oof": {
+            "verdict": 0.5,
+            "first_error": 0.2182,
+            "joint": 0.1091
+          }
+        }
+      },
+      "step_auroc": 0.5065,
+      "step_auroc_no_answer_lines": 0.4407,
+      "top_step_acc": 0.14
+    },
+    "length_only": {
+      "operating_points": {
+        "joint": {
+          "threshold": 0.5499999999999999,
+          "test": {
+            "verdict": 0.5,
+            "first_error": 0.0,
+            "joint": 0.5
+          },
+          "oof": {
+            "verdict": 0.5018,
+            "first_error": 0.0036,
+            "joint": 0.5
+          }
+        },
+        "balanced": {
+          "threshold": 0.15,
+          "test": {
+            "verdict": 0.55,
+            "first_error": 0.16,
+            "joint": 0.28
+          },
+          "oof": {
+            "verdict": 0.56,
+            "first_error": 0.2509,
+            "joint": 0.3036
+          }
+        }
+      },
+      "step_auroc": 0.7082,
+      "step_auroc_no_answer_lines": 0.6262,
+      "top_step_acc": 0.24
+    },
+    "position+length": {
+      "operating_points": {
+        "joint": {
+          "threshold": 0.65,
+          "test": {
+            "verdict": 0.5,
+            "first_error": 0.0,
+            "joint": 0.5
+          },
+          "oof": {
+            "verdict": 0.5,
+            "first_error": 0.0,
+            "joint": 0.5
+          }
+        },
+        "balanced": {
+          "threshold": 0.125,
+          "test": {
+            "verdict": 0.51,
+            "first_error": 0.18,
+            "joint": 0.14
+          },
+          "oof": {
+            "verdict": 0.5545,
+            "first_error": 0.2836,
+            "joint": 0.2418
+          }
+        }
+      },
+      "step_auroc": 0.7162,
+      "step_auroc_no_answer_lines": 0.6365,
+      "top_step_acc": 0.22
+    }
+  },
+  "ci95": {
+    "probe": {
+      "joint/verdict": [
+        0.6598,
+        0.82
+      ],
+      "joint/first_error": [
+        0.2453,
+        0.5192
+      ],
+      "joint/joint": [
+        0.51,
+        0.7
+      ],
+      "balanced/verdict": [
+        0.64,
+        0.8102
+      ],
+      "balanced/first_error": [
+        0.2115,
+        0.4694
+      ],
+      "balanced/joint": [
+        0.45,
+        0.64
+      ],
+      "top_step_acc": [
+        0.2499,
+        0.5098
+      ],
+      "step_auroc": [
+        0.8377,
+        0.9179
+      ]
+    },
+    "position_only": {
+      "joint/verdict": [
+        0.4,
+        0.6
+      ],
+      "joint/first_error": [
+        0.0,
+        0.0
+      ],
+      "joint/joint": [
+        0.4,
+        0.6
+      ],
+      "balanced/verdict": [
+        0.4,
+        0.6
+      ],
+      "balanced/first_error": [
+        0.0208,
+        0.1915
+      ],
+      "balanced/joint": [
+        0.01,
+        0.1
+      ],
+      "top_step_acc": [
+        0.0517,
+        0.2407
+      ],
+      "step_auroc": [
+        0.4207,
+        0.5901
+      ]
+    },
+    "length_only": {
+      "joint/verdict": [
+        0.4,
+        0.6
+      ],
+      "joint/first_error": [
+        0.0,
+        0.0
+      ],
+      "joint/joint": [
+        0.4,
+        0.6
+      ],
+      "balanced/verdict": [
+        0.45,
+        0.65
+      ],
+      "balanced/first_error": [
+        0.0625,
+        0.2692
+      ],
+      "balanced/joint": [
+        0.2,
+        0.37
+      ],
+      "top_step_acc": [
+        0.1277,
+        0.3618
+      ],
+      "step_auroc": [
+        0.6512,
+        0.7623
+      ]
+    },
+    "position+length": {
+      "joint/verdict": [
+        0.4,
+        0.6
+      ],
+      "joint/first_error": [
+        0.0,
+        0.0
+      ],
+      "joint/joint": [
+        0.4,
+        0.6
+      ],
+      "balanced/verdict": [
+        0.41,
+        0.61
+      ],
+      "balanced/first_error": [
+        0.0784,
+        0.2917
+      ],
+      "balanced/joint": [
+        0.07,
+        0.21
+      ],
+      "top_step_acc": [
+        0.1091,
+        0.3335
+      ],
+      "step_auroc": [
+        0.6591,
+        0.7694
+      ]
+    }
+  },
+  "paired_probe_minus_baseline_ci95": {
+    "position_only": {
+      "joint/verdict": [
+        0.13,
+        0.35
+      ],
+      "joint/first_error": [
+        0.2453,
+        0.5192
+      ],
+      "joint/joint": [
+        0.01,
+        0.21
+      ],
+      "balanced/verdict": [
+        0.0997,
+        0.36
+      ],
+      "balanced/first_error": [
+        0.0741,
+        0.4039
+      ],
+      "balanced/joint": [
+        0.39,
+        0.61
+      ],
+      "top_step_acc": [
+        0.08,
+        0.3953
+      ],
+      "step_auroc": [
+        0.2858,
+        0.4633
+      ]
+    },
+    "length_only": {
+      "joint/verdict": [
+        0.13,
+        0.35
+      ],
+      "joint/first_error": [
+        0.2453,
+        0.5192
+      ],
+      "joint/joint": [
+        0.01,
+        0.21
+      ],
+      "balanced/verdict": [
+        0.05,
+        0.3
+      ],
+      "balanced/first_error": [
+        0.0465,
+        0.3148
+      ],
+      "balanced/joint": [
+        0.16,
+        0.38
+      ],
+      "top_step_acc": [
+        -0.0185,
+        0.2895
+      ],
+      "step_auroc": [
+        0.1086,
+        0.2385
+      ]
+    },
+    "position+length": {
+      "joint/verdict": [
+        0.13,
+        0.35
+      ],
+      "joint/first_error": [
+        0.2453,
+        0.5192
+      ],
+      "joint/joint": [
+        0.01,
+        0.21
+      ],
+      "balanced/verdict": [
+        0.09,
+        0.35
+      ],
+      "balanced/first_error": [
+        0.0192,
+        0.3138
+      ],
+      "balanced/joint": [
+        0.3,
+        0.52
+      ],
+      "top_step_acc": [
+        0.0165,
+        0.3001
+      ],
+      "step_auroc": [
+        0.1028,
+        0.2269
+      ]
+    }
+  },
+  "length_audit_probe": {
+    "n_correct_steps": 345,
+    "n_first_error_steps": 50,
+    "note": "answer lines excluded; rho CI clustered by solution; observational, not causal",
+    "correct_steps": {
+      "rho": 0.3563,
+      "rho_ci95": [
+        0.2522,
+        0.456
+      ]
+    },
+    "first_error_steps": {
+      "rho": 0.0903
+    },
+    "tertile_token_cutoffs": [
+      24.333333333333314,
+      34.0
+    ],
+    "auroc_within_length_tertile": {
+      "tertile1": 0.9463,
+      "tertile2": 0.8001,
+      "tertile3": 0.8122
+    }
+  },
+  "protocol": "Fit, layer choice and thresholds use 5-fold OOF on train+val only; test scored once; CIs are clustered bootstraps over solutions; 'balanced' operating point was declared before the final run because 'joint' is degenerate on a 50/50 test set."
+}
