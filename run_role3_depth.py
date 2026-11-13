@@ -144,7 +144,7 @@ def train_and_evaluate(model, train_loader, val_data, test_data, epochs=20, lr=1
         
         if return_state:
             return val_metrics, test_metrics, {k: v.cpu() for k, v in best_model_state.items()}
-        return val_metrics, test_metrics
+        return test_metrics
 
 def prep_data(data_dict, device):
     return (
