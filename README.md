@@ -110,7 +110,7 @@ Implemented in `models.py`, `run_role2_capacity.py`, and `verify_role2_data.py`.
 | Qwen3-0.6B | Linear | 1,025 | 69.33 ± 5.03 | **24.67 ± 7.57** | 58.33 ± 2.52 | 46.67 ± 12.70 | 8.00 ± 5.29 | 59.61 ± 10.99 |
 | Qwen3-0.6B | MLP | 263,169 | **71.67 ± 3.21** | 24.00 ± 6.00 | **59.33 ± 2.08** | **48.67 ± 8.08** | **5.33 ± 2.31** | **62.93 ± 6.60** |
 
-*Takeaway:* `MLPProbe` improves First-Error Accuracy on Qwen2.5-0.5B (+8.67 ± 5.03 pp) by raising error recall from 36.67% to 53.33%, but provides no localization gain on Qwen3-0.6B (−0.67 ± 4.73 pp), indicating strong linear separability in Qwen3-0.6B representations.
+*Takeaway:* `MLPProbe` improves First-Error Accuracy on Qwen2.5-0.5B (+8.67 ± 7.02 pp) by raising error recall from 36.67% to 53.33%, but provides no localization gain on Qwen3-0.6B (−0.67 ± 4.62 pp), indicating strong linear separability in Qwen3-0.6B representations.
 
 ```bash
 python verify_role2_data.py

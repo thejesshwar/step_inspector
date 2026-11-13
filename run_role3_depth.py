@@ -158,11 +158,11 @@ def prep_data(data_dict, device):
 def main():
     print(f"Loading cached tensors on {DEVICE}")
     try:
-        train = torch.load("backup_qwen25/train_cached.pt", map_location=DEVICE, weights_only=True)
-        val = torch.load("backup_qwen25/val_cached.pt", map_location=DEVICE, weights_only=True)
-        test = torch.load("backup_qwen25/test_cached.pt", map_location=DEVICE, weights_only=True)
+        train = torch.load("data/train_cached.pt", map_location=DEVICE, weights_only=True)
+        val = torch.load("data/val_cached.pt", map_location=DEVICE, weights_only=True)
+        test = torch.load("data/test_cached.pt", map_location=DEVICE, weights_only=True)
     except FileNotFoundError:
-        print("Error: Cached tensors not found. Ensure 'train_cached.pt' is in 'backup_qwen25/'")
+        print("Error: Cached tensors not found. Ensure 'train_cached.pt' is in 'data/'")
         return
 
     X_train, y_train, mask_train, gold_train, lens_train = prep_data(train, DEVICE)
@@ -230,8 +230,8 @@ def main():
         "hidden_dim": hidden_dim,
         "num_layers": num_layers,
         "model_label": model_label
-    }, "backup_qwen25/best_step_probe.pt")
-    print(f"Saved optimal probe checkpoint (Layer {best_layer}) to 'backup_qwen25/best_step_probe.pt'")
+    }, "data/best_step_probe.pt")
+    print(f"Saved optimal probe checkpoint (Layer {best_layer}) to 'data/best_step_probe.pt'")
 
     print("\nTraining Cross Layer Attention Probe")
     g_multi = torch.Generator(device="cpu").manual_seed(42)
@@ -263,7 +263,7 @@ def main():
     plt.grid(True, linestyle='--', alpha=0.5)
     plt.legend(frameon=True, loc='best')
     plt.tight_layout()
-    plt.savefig("backup_qwen25/layer_depth_progression.png", dpi=300)
+    plt.savefig("layer_depth_progression.png", dpi=300)
     print("\nSaved plot as 'layer_depth_progression.png'")
 
 if __name__ == "__main__":
