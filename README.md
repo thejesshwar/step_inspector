@@ -206,7 +206,43 @@ python run_role3_masking_ablation.py
 ```
 ### Member 4: Diagnostic Benchmarks & Meta-Evaluation
 
-*Pending — to be filled by Member 4 (Position-only baseline, Length-bias audit, Joint/First-Error metrics).*
+Implemented in `m4_evaluate.py`, `m4_common.py`, `m4_audit.py`, `m4_stress_test.py`.
+
+**Protocol**
+- Layer & threshold selection via 5-fold out-of-fold on train+val only; test scored once
+- Bootstrap 95% CIs clustered over solutions (2000 resamples)
+- Primary metrics: step AUROC (threshold-free) and top-step accuracy
+
+**Main Results (Test Split: 100 solutions, 50 faulty)**
+
+| Model | Method | Step AUROC [95% CI] | Top-Step Acc [95% CI] | Verdict [%] | First-Error [%] | Joint [%] |
+|---|---|---|---|---|---|---|
+| Qwen2.5-0.5B | Step probe | 0.880 [0.84–0.92] | 38.0 [25–51] | 73.0 | 34.0 | 55.0 |
+| Qwen2.5-0.5B | Position only | 0.506 [0.42–0.59] | 14.0 [5–24] | 50.0 | 10.0 | 5.0 |
+| Qwen2.5-0.5B | Length only | 0.708 [0.65–0.76] | 24.0 [13–36] | 55.0 | 16.0 | 28.0 |
+| Qwen3-0.6B | Step probe | 0.857 [0.80–0.90] | 36.0 [22–50] | 71.0 | 34.0 | 52.0 |
+| Qwen3-0.6B | Position only | 0.506 [0.42–0.59] | 14.0 [5–24] | 50.0 | 10.0 | 5.0 |
+| Qwen3-0.6B | Length only | 0.708 [0.65–0.76] | 24.0 [13–36] | 55.0 | 16.0 | 28.0 |
+
+**Key Takeaways**
+- Step probe AUROC (0.86–0.88) clearly exceeds position-only (0.51) and meaningfully exceeds length-only (0.71)
+- Without trivial answer lines: probe AUROC 0.849 / 0.823 vs length-only 0.63 — signal is not just answer-line detection
+- First-error localization: 38% / 36% vs 13.5% random — but gain over length-only includes zero, so cannot claim probe beats length at locating the error
+- Joint accuracy (55% / 52%) is not above the trivial 50% "always correct" baseline on a 50/50 test set
+- No winner between models: AUROC gap is 0.023, and out-of-fold ordering reverses on test
+
+**Limitations**
+- Only 50 faulty test solutions → intervals ~±13 points; do not rank differences smaller than that
+- Length findings are observational; the padding test changes wording as well as length
+- "Balanced" operating point was declared after seeing that "joint" is degenerate on 50/50 data; report both
+
+Run the evaluation locally:
+```bash
+python m4_evaluate.py --cache-dir data/qwen25 --dataset data/assignment3_data.json --out-dir m4_outputs/qwen25
+python m4_evaluate.py --cache-dir qwen3 --dataset data/assignment3_data.json --out-dir m4_outputs/qwen3
+python m4_audit.py --cache-dir data/qwen25 --dataset data/assignment3_data.json --out-dir m4_outputs/qwen25 --parity 20
+python m4_stress_test.py --cache-dir data/qwen25 --dataset data/assignment3_data.json --out-dir m4_outputs/qwen25
+```
 
 ## Academic Integrity and AI Declaration
 
